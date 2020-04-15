@@ -30,6 +30,7 @@ architecture Behavioral of cache_ctrl_lru is
     signal full : t_full;
     signal tag_reg : std_logic_vector(15 downto 0);
     signal s_col : std_logic_vector(1 downto 0);
+    signal done : std_logic := '0';
 begin
 
     process(clk) is
@@ -49,12 +50,13 @@ begin
                 temp1 <= lru(to_integer(unsigned(index)),1);
                 temp2 <= lru(to_integer(unsigned(index)),2);
                 temp3 <= lru(to_integer(unsigned(index)),3);
-                receive <= it_valid;
                 if(it_valid = '1') then
                     tag_reg <= tag;
                     it_ready <= '1';
+                    receive <= '1';
                 else
                     it_ready <= '0';
+                    receive <= '0';
                 end if;                   
                 if(receive = '1') then                         
                     if(tag_reg = s_tags(63 downto 48) ) then
@@ -132,7 +134,6 @@ begin
                                 lru(to_integer(unsigned(index)),2) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),2))+1);
                                 lru(to_integer(unsigned(index)),3) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),3))+1);
                                 sets(to_integer(unsigned(index)))(63 downto 48) <= tag_reg;
-                                col <= "11";
                              -- ako nije prva kolona LRU  
                              else
                                 -- proverava da li je prva kolona LRU pre druge
@@ -144,6 +145,23 @@ begin
                                        lru(to_integer(unsigned(index)),2) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),2))+1);
                                        lru(to_integer(unsigned(index)),3) <= x"0";
                                        sets(to_integer(unsigned(index)))(15 downto 0) <= tag_reg; 
+                                    -- ako nije prva kolona LRU pre trece 
+                                    else 
+                                        -- proverava se da li je treca kolona LRU pre cetvrte, ako je zadovoljena treca kolona je LRU
+                                        if(unsigned(lru(to_integer(unsigned(index)),2)) >= unsigned(lru(to_integer(unsigned(index)),3))) then
+                                           lru(to_integer(unsigned(index)),0) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),0))+1);
+                                           lru(to_integer(unsigned(index)),1) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),1))+1);
+                                           lru(to_integer(unsigned(index)),2) <= x"0";
+                                           lru(to_integer(unsigned(index)),3) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),3))+1);
+                                           sets(to_integer(unsigned(index)))(31 downto 16) <= tag_reg;
+                                        -- ako nije cetvrta kolona je LRU
+                                        else
+                                           lru(to_integer(unsigned(index)),0) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),0))+1);
+                                           lru(to_integer(unsigned(index)),1) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),1))+1);
+                                           lru(to_integer(unsigned(index)),2) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),2))+1);
+                                           lru(to_integer(unsigned(index)),3) <= x"0";
+                                           sets(to_integer(unsigned(index)))(15 downto 0) <= tag_reg;
+                                        end if;
                                     end if;
                                 -- prva kolona nije LRU pre druge
                                 else
@@ -163,30 +181,41 @@ begin
                                             lru(to_integer(unsigned(index)),2) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),2))+1);
                                             lru(to_integer(unsigned(index)),3) <= x"0";
                                             sets(to_integer(unsigned(index)))(15 downto 0) <= tag_reg;
-                                        -- druga kolona nije LRU pre trece, treca kolona je LRU
-                                        else 
-                                            lru(to_integer(unsigned(index)),0) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),0))+1);
-                                            lru(to_integer(unsigned(index)),1) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),1))+1);
-                                            lru(to_integer(unsigned(index)),2) <= x"0";
-                                            lru(to_integer(unsigned(index)),3) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),3))+1);
-                                            sets(to_integer(unsigned(index)))(31 downto 16) <= tag_reg;
+                                        -- druga kolona nije LRU pre trece
+                                        else
+                                            -- proverava da li je treca kolona LRU pre cetvrte, ako jeste znaci treca je LRU
+                                            if(unsigned(lru(to_integer(unsigned(index)),2)) >= unsigned(lru(to_integer(unsigned(index)),3))) then
+                                                lru(to_integer(unsigned(index)),0) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),0))+1);
+                                                lru(to_integer(unsigned(index)),1) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),1))+1);
+                                                lru(to_integer(unsigned(index)),2) <= x"0";
+                                                lru(to_integer(unsigned(index)),3) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),3))+1);
+                                                sets(to_integer(unsigned(index)))(31 downto 16) <= tag_reg;lru(to_integer(unsigned(index)),0) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),0))+1);
+                                             -- ako nije, cetvrta je LRU
+                                             else 
+                                                lru(to_integer(unsigned(index)),0) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),0))+1);
+                                                lru(to_integer(unsigned(index)),1) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),1))+1);
+                                                lru(to_integer(unsigned(index)),2) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),2))+1);
+                                                lru(to_integer(unsigned(index)),3) <= x"0";
+                                                sets(to_integer(unsigned(index)))(15 downto 0) <= tag_reg;
+                                             end if;
                                         end if;
                                     end if;
                                 end if;
                             end if;
-                        end if;                    
-                    end if;
+                        end if;
+                    done <= '1';                    
+                    end if;                   
+                end if;
+                if(done = '1') then
                     hm_valid <= '1';
+                    hit_miss <= s_hit0 or s_hit1 or s_hit2 or s_hit3;
+                    col <= s_col;
                     if(hm_ready = '1') then 
-                        hit_miss <= s_hit0 or s_hit1 or s_hit2 or s_hit3;
-                        col <= s_col;
-                    else
                         col<= "00"; 
-                        hit_miss <= '0';
-                    end if;
-                 else
-                    hm_valid <= '0';                    
-                end if;                                    
+                        hit_miss <= '0'; 
+                        hm_valid <= '0'; 
+                    end if;                
+                end if;                                
             end if;
         end if;
     end process; 
