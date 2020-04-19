@@ -83,7 +83,7 @@ begin
                             lru(to_integer(unsigned(index)),2) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),2))+1);
                             lru(to_integer(unsigned(index)),3) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),3))+1);
                         end if;
-                     elsif (tag_reg = s_tags(31 downto 16)) then
+                    elsif (tag_reg = s_tags(31 downto 16)) then
                         s_hit0 <= '0';
                         s_hit1 <= '0';
                         s_hit2 <= '1';
@@ -95,7 +95,7 @@ begin
                                 lru(to_integer(unsigned(index)),2) <= x"0";
                                 lru(to_integer(unsigned(index)),3) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),3))+1);
                             end if;
-                     elsif (tag_reg = s_tags(15 downto 0)) then
+                    elsif (tag_reg = s_tags(15 downto 0)) then
                         s_hit0 <= '0';
                         s_hit1 <= '0';
                         s_hit2 <= '0';
@@ -107,7 +107,7 @@ begin
                             lru(to_integer(unsigned(index)),2) <= std_logic_vector(unsigned(lru(to_integer(unsigned(index)),2))+1);
                             lru(to_integer(unsigned(index)),3) <= x"0";
                         end if;
-                      else
+                    else
                         s_col <= "00";
                         s_hit0 <= '0';
                         s_hit1 <= '0';
@@ -202,9 +202,9 @@ begin
                                     end if;
                                 end if;
                             end if;
-                        end if;
-                    done <= '1';                    
-                    end if;                   
+                        end if;                   
+                    end if; 
+                    done <= '1';                   
                 end if;
                 if(done = '1') then
                     hm_valid <= '1';
@@ -214,6 +214,7 @@ begin
                         col<= "00"; 
                         hit_miss <= '0'; 
                         hm_valid <= '0'; 
+                        done <= '0';
                     end if;                
                 end if;                                
             end if;

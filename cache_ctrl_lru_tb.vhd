@@ -24,7 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -78,42 +78,69 @@ begin
         clk_s <= not clk_s;--'0', '1' after 10 ns;
         wait for 1000 ns;
     end process;
-    
     uut_gen: process is
     begin
         rst_s <= '1';
         wait for 1000 ns;
         rst_s <= '0';
+        index_s <= "0000000000";
+        
         wait until falling_edge(rst_s);
         wait until falling_edge(clk_s);
+        for i in 0 to 10 loop
+            it_valid_s <= '1';
+            tag_s <= x"0001";
+            index_s <= std_logic_vector(unsigned(index_s)+1);
+            wait until falling_edge(clk_s);
+            it_valid_s <= '0';
+            wait until hm_valid_s = '1';
+            wait until falling_edge(clk_s);
+            hm_ready_s <= '1';
+            wait until falling_edge(clk_s);
+            hm_ready_s <= '0';
+            for i in 1 to 5 loop
+                wait until falling_edge(clk_s);
+            end loop;
+        end loop;
+        for i in 0 to 10 loop 
+            it_valid_s <= '1';
+            tag_s <= std_logic_vector(unsigned(tag_s)+1);
+            --index_s <= std_logic_vector(unsigned(index_s)+1);
+            wait until falling_edge(clk_s);
+            it_valid_s <= '0';
+            wait until hm_valid_s = '1';
+            wait until falling_edge(clk_s);
+            hm_ready_s <= '1';
+            wait until falling_edge(clk_s);
+            hm_ready_s <= '0';
+            for i in 1 to 5 loop
+                wait until falling_edge(clk_s);
+            end loop;
+        end loop;
         it_valid_s <= '1';
-        tag_s <= x"0001";
-        index_s <= "0000000000";
-        wait until falling_edge(clk_s);
+        tag_s <= x"000a";
+        --for i in 1 to 5 loop
+            wait until falling_edge(clk_s);
+        --end loop;
         it_valid_s <= '0';
+        wait until hm_valid_s = '1';
+        wait until falling_edge(clk_s);
         hm_ready_s <= '1';
+        wait until falling_edge(clk_s);
+        hm_ready_s <= '0';
         for i in 1 to 5 loop
             wait until falling_edge(clk_s);
         end loop;
         it_valid_s <= '1';
-        tag_s <= x"0002";
-        for i in 1 to 5 loop
-            wait until falling_edge(clk_s);
-        end loop;
+        tag_s <= x"0009";
+        wait until falling_edge(clk_s);
         it_valid_s <= '0';
-        tag_s <= x"0002";
-        for i in 1 to 5 loop
-            wait until falling_edge(clk_s);
-        end loop;
-        tag_s <= x"0003";
-        for i in 1 to 5 loop
-            wait until falling_edge(clk_s);
-        end loop;
-        tag_s <= x"0004";
+        wait until hm_valid_s = '1';
         wait until falling_edge(clk_s);
-        tag_s <= x"0001";
+        hm_ready_s <= '1';
         wait until falling_edge(clk_s);
-        tag_s <= x"FFFF";
+        hm_ready_s <= '0';
+        --tag_s <= x"FFFF";
         wait;
     end process;
 end Behavioral;
