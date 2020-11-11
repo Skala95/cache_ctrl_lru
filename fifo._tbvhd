@@ -1,0 +1,91 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date: 11/11/2020 12:42:43 PM
+-- Design Name: 
+-- Module Name: fifo_tb - Behavioral
+-- Project Name: 
+-- Target Devices: 
+-- Tool Versions: 
+-- Description: 
+-- 
+-- Dependencies: 
+-- 
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+-- 
+----------------------------------------------------------------------------------
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx leaf cells in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+entity fifo_tb is
+--  Port ( );
+end fifo_tb;
+
+architecture Behavioral of fifo_tb is
+
+    component fifo is
+      port ( 
+            clk : in std_logic;
+            rst : in std_logic;
+            fifo_en : in std_logic;
+            data_in : in std_logic_vector(15 downto 0);
+            col_o : out std_logic_vector(1 downto 0);
+            hitmiss_o : out std_logic);
+    end component;
+    signal  clk_s : std_logic;
+    signal rst_s :  std_logic;
+    signal fifo_en_s :  std_logic;
+    signal data_in_s :  std_logic_vector(15 downto 0);
+    signal col_o_s :  std_logic_vector(1 downto 0);
+    signal hitmiss_o_s :  std_logic;
+
+begin
+
+     duv: fifo
+        port map ( 
+            clk => clk_s,
+            rst => rst_s,
+            fifo_en => fifo_en_s,
+            data_in => data_in_s,
+            col_o => col_o_s,
+            hitmiss_o => hitmiss_o_s);
+    
+     clk_gen: process
+     begin
+        clk_s <= '0', '1' after 100 ns;
+        wait for 200 ns;
+     end process;
+
+     stim_gen: process
+     begin
+        rst_s <= '1'; 
+        wait for 1000 ns;
+        rst_s <= '0';
+        wait until falling_edge(rst_s);
+        wait until rising_edge(clk_s);
+        
+        fifo_en_s <= '1';
+        data_in_s <= x"0001";
+        wait until rising_edge(clk_s);
+        for i in 0 to 5 loop
+          data_in_s <= std_logic_vector(unsigned(data_in_s)+1);
+          wait until rising_edge(clk_s);          
+        end loop;
+        fifo_en_s <= '0';
+     
+     end process;
+end Behavioral;
