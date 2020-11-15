@@ -139,10 +139,13 @@ end cache_ctrl_lru_tb;
 
 architecture Behavioral of cache_ctrl_lru_tb is
     component cache_ctrl_lru is
+       generic(SET_SIZE : natural := 1024;
+      	TAG_SIZE : natural := 4--16   
+      		  );
        port(clk : in std_logic;
             rst : in std_logic;
             index: in std_logic_vector(9 downto 0);
-            tag: in std_logic_vector(15 downto 0);
+            tag: in std_logic_vector((TAG_SIZE - 1) downto 0);
             it_valid : in std_logic;
             hm_ready: in std_logic;
             it_ready: out std_logic;
@@ -154,7 +157,7 @@ architecture Behavioral of cache_ctrl_lru_tb is
     signal clk_s : std_logic := '0';
     signal rst_s : std_logic := '0';
     signal index_s : std_logic_vector(9 downto 0) := (others => '0');
-    signal tag_s : std_logic_vector(15 downto 0) := (others => '0');
+    signal tag_s : std_logic_vector(3 downto 0) := (others => '0');
     signal it_valid_s : std_logic := '0';
     signal it_ready_s : std_logic := '0';
     signal hm_ready_s : std_logic := '0';
@@ -186,13 +189,14 @@ begin
         wait for 1000 ns;
         rst_s <= '0';
         index_s <= "0000000000";
-        
+        it_valid_s <= '1';
+        tag_s <= "0000";
         wait until falling_edge(rst_s);
         wait until falling_edge(clk_s);
         for i in 0 to 10 loop
             it_valid_s <= '1';
-            tag_s <= x"0001";
-            index_s <= std_logic_vector(unsigned(index_s)+1);
+            tag_s <= "0000";
+            --index_s <= std_logic_vector(unsigned(index_s)+1);
             wait until falling_edge(clk_s);
             wait until falling_edge(clk_s);
             it_valid_s <= '0';
@@ -222,7 +226,7 @@ begin
             end loop;
         end loop;
         it_valid_s <= '1';
-        tag_s <= x"000a";
+        tag_s <= "1010";
         for i in 1 to 5 loop
             wait until falling_edge(clk_s);
         end loop;
@@ -236,7 +240,7 @@ begin
             wait until falling_edge(clk_s);
         end loop;
         it_valid_s <= '1';
-        tag_s <= x"0009";
+        tag_s <= "1001";
         wait until falling_edge(clk_s);
         wait until falling_edge(clk_s);
         it_valid_s <= '0';
