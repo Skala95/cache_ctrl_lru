@@ -117,7 +117,7 @@ begin
             	--receive_reg <= receive_next;
             	--done_reg <= done_next;  	 
             	tag_reg <= tag_next;   
-            	set <= sets_reg(to_integer(unsigned(index)));   --ovo predstavlja problem
+            	set <= sets_next(to_integer(unsigned(index)));   --ovo predstavlja problem
         	end if;
     	end if;
 	end process;
@@ -164,7 +164,7 @@ begin
          	when checking =>
             	it_ready <= '0';
                	hm_valid <= '0';
-            	if(tag_reg = set((4*TAG_SIZE - 1) downto (3*TAG_SIZE)) and full_reg(to_integer(unsigned(index)))(3) = '1') then
+            	if(tag_reg = sets_reg(to_integer(unsigned(index)))((4*TAG_SIZE - 1) downto (3*TAG_SIZE)) and full_reg(to_integer(unsigned(index)))(3) = '1') then
                  	s_hit0_next <= '1';
                  	s_hit1_next <= '0';
                  	s_hit2_next <= '0';
@@ -177,7 +177,7 @@ begin
                      	lru_next(to_integer(unsigned(index)),3) <= std_logic_vector(unsigned(lru_reg(to_integer(unsigned(index)),3))+1);
                  	--end if;
                  	--done_next <= '1';
-             	elsif (tag_reg = set((3*TAG_SIZE - 1) downto (2*TAG_SIZE)) and full_reg(to_integer(unsigned(index)))(2) = '1')  then
+             	elsif (tag_reg = sets_reg(to_integer(unsigned(index)))((3*TAG_SIZE - 1) downto (2*TAG_SIZE)) and full_reg(to_integer(unsigned(index)))(2) = '1')  then
                  	s_hit0_next <= '0';
                  	s_hit1_next <= '1';
                  	s_hit2_next <= '0';
@@ -190,7 +190,7 @@ begin
                      	lru_next(to_integer(unsigned(index)),3) <= std_logic_vector(unsigned(lru_reg(to_integer(unsigned(index)),3))+1);
                  	--end if;
                  	--done_next <= '1';
-             	elsif (tag_reg = set((2*TAG_SIZE - 1) downto (TAG_SIZE))and full_reg(to_integer(unsigned(index)))(1) = '1') then
+             	elsif (tag_reg = sets_reg(to_integer(unsigned(index)))((2*TAG_SIZE - 1) downto (TAG_SIZE))and full_reg(to_integer(unsigned(index)))(1) = '1') then
                  	s_hit0_next <= '0';
                  	s_hit1_next <= '0';
                  	s_hit2_next <= '1';
@@ -203,7 +203,7 @@ begin
                      	lru_next(to_integer(unsigned(index)),3) <= std_logic_vector(unsigned(lru_reg(to_integer(unsigned(index)),3))+1);
                  	--end if;
                  	--done_next <= '1';
-             	elsif (tag_reg = set((TAG_SIZE - 1) downto 0) and full_reg(to_integer(unsigned(index)))(0) = '1') then
+             	elsif (tag_reg = sets_reg(to_integer(unsigned(index)))((TAG_SIZE - 1) downto 0) and full_reg(to_integer(unsigned(index)))(0) = '1') then
                  	s_hit0_next <= '0';
                  	s_hit1_next <= '0';
                  	s_hit2_next <= '0';
@@ -221,25 +221,25 @@ begin
                  	s_hit1_next <= '0';
                  	s_hit2_next <= '0';
                  	s_hit3_next <= '0';
-                 	if(lru_reg(to_integer(unsigned(index)),0) = x"0" and full_reg(to_integer(unsigned(index)))(3) = '0') then
+                 	if(full_reg(to_integer(unsigned(index)))(3) = '0') then
                      	s_col_next <= "00";
                     	sets_next(to_integer(unsigned(index)))((4*TAG_SIZE - 1) downto (3*TAG_SIZE))  <= tag_reg;
-                    	lru_next(to_integer(unsigned(index)),0) <= std_logic_vector(unsigned(lru_reg(to_integer(unsigned(index)),0))+1);
+                    	lru_next(to_integer(unsigned(index)),0) <= (others => '0'); --std_logic_vector(unsigned(lru_reg(to_integer(unsigned(index)),0))+1)
                     	full_next(to_integer(unsigned(index)))(3) <= '1';
-                 	elsif(lru_reg(to_integer(unsigned(index)),1) = x"0" and full_reg(to_integer(unsigned(index)))(2) = '0') then
+                 	elsif(full_reg(to_integer(unsigned(index)))(2) = '0') then
                      	s_col_next <= "01";
                     	sets_next(to_integer(unsigned(index)))((3*TAG_SIZE - 1) downto (2*TAG_SIZE))  <= tag_reg;
-                    	lru_next(to_integer(unsigned(index)),1) <= std_logic_vector(unsigned(lru_reg(to_integer(unsigned(index)),1))+1);
+                    	lru_next(to_integer(unsigned(index)),1) <= (others => '0');
                     	full_next(to_integer(unsigned(index)))(2) <= '1';
-                 	elsif(lru_reg(to_integer(unsigned(index)),2) = x"0" and full_reg(to_integer(unsigned(index)))(1) = '0') then
+                 	elsif(full_reg(to_integer(unsigned(index)))(1) = '0') then
                      	s_col_next <= "10";
                     	sets_next(to_integer(unsigned(index)))((2*TAG_SIZE - 1) downto TAG_SIZE)  <= tag_reg;
-                    	lru_next(to_integer(unsigned(index)),2) <= std_logic_vector(unsigned(lru_reg(to_integer(unsigned(index)),2))+1);
+                    	lru_next(to_integer(unsigned(index)),2) <= (others => '0');
                     	full_next(to_integer(unsigned(index)))(1) <= '1';
-                 	elsif(lru_reg(to_integer(unsigned(index)),3) = x"0" and full_reg(to_integer(unsigned(index)))(0) = '0') then
+                 	elsif(full_reg(to_integer(unsigned(index)))(0) = '0') then
                      	s_col_next <= "11";
                     	sets_next(to_integer(unsigned(index)))((TAG_SIZE - 1) downto 0) <= tag_reg;
-                    	lru_next(to_integer(unsigned(index)),3) <= std_logic_vector(unsigned(lru_reg(to_integer(unsigned(index)),3))+1);
+                    	lru_next(to_integer(unsigned(index)),3) <= (others => '0');
                     	full_next(to_integer(unsigned(index)))(0) <= '1';
                  	else
 --                     	-- proverava se da li je prva kolona LRU, i ako jeste znaci prva kolona je LRU             	 
